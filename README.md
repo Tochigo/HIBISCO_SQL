@@ -22,8 +22,8 @@ HIBISCO SQL es una aplicación web desarrollada con Django y PostgreSQL para pra
 ## 1. Clonar el repositorio
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
-cd <HIBISCO_SQL>
+git clone https://github.com/Tochigo/HIBISCO_SQL.git
+cd HIBISCO_SQL
 ```
 
 ---
