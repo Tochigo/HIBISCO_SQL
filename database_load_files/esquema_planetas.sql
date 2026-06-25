@@ -59,8 +59,3 @@ INSERT INTO satelite (nombre, planeta, descubridor, año) VALUES
     ('Titán', 'Saturno', 'Christiaan Huygens', 1655),
     ('Tritón', 'Neptuno', 'William Lassell', 1846);
 
--- Permisos de solo lectura para el usuario de la aplicación.
--- Ajusta sqlmemoria_user si tu usuario de base de datos tiene otro nombre.
-GRANT USAGE ON SCHEMA planetas TO sqlmemoria_user;
-GRANT SELECT ON ALL TABLES IN SCHEMA planetas TO sqlmemoria_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA planetas GRANT SELECT ON TABLES TO sqlmemoria_user;
