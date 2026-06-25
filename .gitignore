@@ -1,0 +1,16 @@
+# Entorno virtual
+venv/
+
+# Variables de entorno
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Django
+db.sqlite3
+
+# Docker
+*.log

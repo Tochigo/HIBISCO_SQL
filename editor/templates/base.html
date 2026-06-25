@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}HIBISCO SQL{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="dark">
+  <div class="app-container">
+    <header class="header">
+      <a href="{% url 'home' %}" class="logo-link">
+        <span class="logo-icon">🌺</span>
+        <h1 class="logo-text">HIBISCO SQL</h1>
+      </a>
+
+      <div class="header-actions">
+        <div class="help-dropdown">
+          <button class="icon-btn help-btn-text" id="helpBtn" type="button" aria-label="Ver operadores SQL" title="Operadores SQL">
+            Documentación operadores ▾
+          </button>
+
+          <div class="help-dropdown-menu" aria-label="Listado de operadores SQL">
+            <a href="{% url 'SELECT' %}">SELECT</a>
+            <a href="{% url 'WHERE' %}">WHERE</a>
+            <a href="{% url 'ALIAS' %}">ALIAS</a>
+            <a href="{% url 'UNION' %}">UNION</a>
+            <a href="{% url 'EXCEPT' %}">EXCEPT</a>
+            <a href="{% url 'BUSQUEDA&COMPARACION' %}">BÚSQUEDA & COMPARACIÓN</a>
+            <a href="{% url 'JOIN' %}">JOIN</a>
+            <a href="{% url 'LEFT&RIGHTJOIN' %}">LEFT & RIGHT JOIN</a>
+            <a href="{% url 'OUTER_JOIN' %}">OUTER JOIN</a>
+            <a href="{% url 'NESTED_QUERYS' %}">CONSULTAS ANIDADAS</a>
+            <a href="{% url 'AGREGATIONS' %}">AGREGACIONES</a>
+          </div>
+        </div>
+
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Cambiar tema" title="Cambiar tema">
+          <svg id="moonIcon" class="hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+          <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="{% block main_class %}content{% endblock %}">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      Hibisco SQL © 2026 — Diego Reyes G.
+    </footer>
+  </div>
+
+  <script src="{% static 'js/theme.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}HIBISCO SQL - Compilador SQL{% endblock %}
+{% block main_class %}content content-wide{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/eclipse.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+  <link rel="stylesheet" href="{% static 'css/sql_editor.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="segment">
+        <h2 class="segment-title">Tablas disponibles</h2>
+
+        <div class="tabs" id="schemaTabs"></div>
+
+        <div class="table-toolbar">
+          <span id="tableStatus">Cargando esquemas...</span>
+          <span>Vista limitada a 100 filas.</span>
+        </div>
+
+        <div class="schema-table-layout">
+          <aside class="table-list-panel" aria-label="Tablas del esquema seleccionado">
+            <div class="table-list-title">Tablas</div>
+            <div class="table-list" id="tableList">
+              <div class="empty-results">Selecciona un esquema.</div>
+            </div>
+          </aside>
+
+          <div class="preview-panel">
+            <div class="empty-results hidden" id="emptyPreview">No hay datos para mostrar.</div>
+            <div class="data-table-container hidden" id="previewTableContainer">
+              <table class="data-table">
+                <thead id="previewHead"></thead>
+                <tbody id="previewBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="segment">
+        <h2 class="segment-title">Compilador SQL</h2>
+        <p class="segment-subtitle">Escribe acá tu consulta.</p>
+
+        <div class="compiler-grid">
+          <div>
+            <div class="editor-shell">
+              <textarea id="sql-editor">SELECT *
+FROM estudiantes
+LIMIT 10;
+              </textarea>
+            </div>
+            <div id="statusMessage" class="status-message hidden"></div>
+          </div>
+
+          <div class="compiler-actions">
+            <button class="btn btn-primary" id="executeQueryBtn" type="button">Ejecutar consulta</button>
+            <button class="btn" id="clearBtn" type="button">Limpiar salida</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="segment">
+        <h2 class="segment-title">Pasos de ejecución</h2>
+        <div id="descriptionOutput" class="text-output">Los pasos de ejecución aparecerán aquí después de ejecutar una consulta.</div>
+      </section>
+
+      <section class="segment">
+        <div class="segment-header tree-segment-header">
+          <h2 class="segment-title">Árbol relacional</h2>
+
+          <label class="tree-format-toggle" for="treeLabelToggle">
+            <span class="tree-format-toggle-text">Formato:</span>
+            <span class="tree-format-toggle-option">Símbolos</span>
+            <input id="treeLabelToggle" type="checkbox" aria-label="Cambiar formato del árbol relacional entre símbolos y palabras">
+            <span class="tree-format-toggle-slider" aria-hidden="true"></span>
+            <span class="tree-format-toggle-option" id="treeLabelModeText">Palabras</span>
+          </label>
+        </div>
+
+        <div id="treeOutput" class="text-output tree-output">El árbol relacional aparecerá aquí después de ejecutar una consulta.</div>
+        <div id="treePreviewTooltip" class="tree-preview-tooltip"></div>
+      </section>
+
+      <section class="segment">
+        <h2 class="segment-title">Resultados</h2>
+
+
+
+        <div id="resultTableContent">
+          <div class="empty-results" id="emptyResults">No hay resultados para mostrar. Ejecuta una consulta para ver los datos.</div>
+          <div class="data-table-container hidden" id="resultsTableContainer">
+            <table class="data-table" id="resultsTable">
+              <thead id="resultsHead"></thead>
+              <tbody id="resultsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+  <script src="{% static 'js/sql_editor.js' %}"></script>
+{% endblock %}

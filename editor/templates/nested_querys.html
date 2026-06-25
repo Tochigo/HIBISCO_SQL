@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ operator.label }} - HIBISCO SQL{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/operator.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="segment">
+        <h2 class="operator-title">{{ operator.label }}</h2>
+        <div class="operator-description">
+          {{ operator.description|linebreaksbr }}
+        </div>
+      </section>
+
+      <section class="segment">
+        <h2 class="segment-title">Sintaxis</h2>
+        <pre class="syntax-block">{{ operator.syntax }}</pre>
+      </section>
+
+      <section class="segment">
+        <h2 class="segment-title">Ejercicio</h2>
+        <p class="question"><strong>Pregunta:</strong> {{ operator.question }}</p>
+
+        <p class="table-label">Tabla de ejemplo</p>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                {% for col in operator.columns %}
+                  <th>{{ col }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in operator.rows %}
+                <tr>
+                  {% for cell in row %}
+                    <td>{{ cell }}</td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="segment">
+        <h2 class="segment-title">Solución</h2>
+        <button id="toggle-answer" class="btn" type="button">
+          Mostrar respuesta
+        </button>
+
+        <div id="answer-panel" class="answer-panel">
+          <pre class="syntax-block">{{ operator.answer_sql }}</pre>
+
+          <p class="table-label">Resultado esperado</p>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Ciudad</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in operator.answer_rows %}
+                  <tr>
+                    {% for cell in row %}
+                      <td>{{ cell }}</td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/operator.js' %}"></script>
+{% endblock %}
