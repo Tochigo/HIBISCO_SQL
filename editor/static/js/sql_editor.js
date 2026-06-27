@@ -21,6 +21,12 @@ const editor = CodeMirror.fromTextArea(document.getElementById('sql-editor'), {
     const treeOutput = document.getElementById('treeOutput');
     const treePreviewTooltip = document.getElementById('treePreviewTooltip');
     const treeLabelToggle = document.getElementById('treeLabelToggle');
+    const fullPreviewModal = document.getElementById('fullPreviewModal');
+    const fullPreviewTitle = document.getElementById('fullPreviewTitle');
+    const fullPreviewSql = document.getElementById('fullPreviewSql');
+    const fullPreviewEmpty = document.getElementById('fullPreviewEmpty');
+    const fullPreviewTableContainer = document.getElementById('fullPreviewTableContainer');
+    const closeFullPreviewBtn = document.getElementById('closeFullPreviewBtn');
     const treeLabelModeText = document.getElementById('treeLabelModeText');
     const emptyResults = document.getElementById('emptyResults');
     const resultsTableContainer = document.getElementById('resultsTableContainer');
@@ -152,6 +158,7 @@ const editor = CodeMirror.fromTextArea(document.getElementById('sql-editor'), {
       treeOutput.textContent = 'El árbol relacional aparecerá aquí después de ejecutar una consulta.';
       treePreviews = {};
       hideTreePreview();
+      closeFullPreview();
       resultsHead.innerHTML = '';
       resultsBody.innerHTML = '';
       emptyResults.textContent = 'No hay resultados para mostrar. Ejecuta una consulta para ver los datos.';
@@ -169,7 +176,7 @@ const editor = CodeMirror.fromTextArea(document.getElementById('sql-editor'), {
         .replaceAll("'", '&#039;');
     }
 
-    function renderTable(columns, rows, headElement, bodyElement, containerElement, emptyElement, emptyMessage = 'No hay datos para mostrar.') {
+    function renderTable(columns, rows, headElement, bodyElement, containerElement, emptyElement, emptyMessage = 'No hay datos para mostrar.', columnKeys = {}) {
       headElement.innerHTML = '';
       bodyElement.innerHTML = '';
 
@@ -181,11 +188,35 @@ const editor = CodeMirror.fromTextArea(document.getElementById('sql-editor'), {
       }
 
       const headerRow = document.createElement('tr');
+
       columns.forEach((col) => {
         const th = document.createElement('th');
-        th.textContent = col;
+        const keyInfo = columnKeys[col] || {};
+
+        const span = document.createElement('span');
+        span.className = 'column-key-label';
+        span.textContent = col;
+
+        const titleParts = [];
+
+        if (keyInfo.primary) {
+          span.classList.add('column-primary-key');
+          titleParts.push('Llave primaria');
+        }
+
+        if (keyInfo.foreign) {
+          span.classList.add('column-foreign-key');
+          titleParts.push('Llave foránea');
+        }
+
+        if (titleParts.length > 0) {
+          span.title = titleParts.join(' y ');
+        }
+
+        th.appendChild(span);
         headerRow.appendChild(th);
       });
+
       headElement.appendChild(headerRow);
 
       if (!rows || rows.length === 0) {
@@ -313,13 +344,117 @@ const editor = CodeMirror.fromTextArea(document.getElementById('sql-editor'), {
       treePreviewTooltip.style.display = 'none';
     }
 
+    function buildFullPreviewTableHtml(columns, rows) {
+      const headHtml = columns
+        .map((col) => `<th>${escapeHtml(col)}</th>`)
+        .join('');
+
+      const bodyHtml = rows.length > 0
+        ? rows.map((row) => `
+            <tr>
+              ${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join('')}
+            </tr>
+          `).join('')
+        : `<tr><td colspan="${columns.length}">No hay filas para mostrar.</td></tr>`;
+
+      return `
+        <table class="full-preview-table">
+          <thead>
+            <tr>${headHtml}</tr>
+          </thead>
+          <tbody>${bodyHtml}</tbody>
+        </table>
+      `;
+    }
+
+    function openFullPreview(nodeElement) {
+      if (!fullPreviewModal) return;
+
+      const nodeId = nodeElement.dataset.nodeId;
+      const preview = treePreviews[nodeId];
+
+      hideTreePreview();
+
+      fullPreviewModal.classList.remove('hidden');
+      fullPreviewModal.setAttribute('aria-hidden', 'false');
+
+      fullPreviewTitle.textContent = 'Tabla completa del operador';
+      fullPreviewSql.textContent = '';
+      fullPreviewSql.classList.add('hidden');
+      fullPreviewEmpty.textContent = '';
+      fullPreviewEmpty.classList.add('hidden');
+      fullPreviewTableContainer.innerHTML = '';
+
+      if (!preview) {
+        fullPreviewEmpty.textContent = 'No hay vista previa disponible para este nodo.';
+        fullPreviewEmpty.classList.remove('hidden');
+        return;
+      }
+
+      fullPreviewTitle.textContent = `Tabla completa: ${formatRelationalLabel(preview.label || 'Nodo del árbol')}`;
+
+      if (preview.sql) {
+        fullPreviewSql.textContent = preview.sql;
+        fullPreviewSql.classList.remove('hidden');
+      }
+
+      if (preview.error) {
+        fullPreviewEmpty.textContent = preview.error;
+        fullPreviewEmpty.classList.remove('hidden');
+        return;
+      }
+
+      const columns = preview.columns || [];
+      const rows = preview.full_rows || preview.rows || [];
+      const rowCount = preview.full_row_count ?? rows.length;
+
+      if (columns.length === 0) {
+        fullPreviewEmpty.textContent = 'Este nodo no tiene columnas para mostrar.';
+        fullPreviewEmpty.classList.remove('hidden');
+        return;
+      }
+
+      fullPreviewTableContainer.innerHTML = `
+        <div class="full-preview-meta">Filas: ${escapeHtml(rowCount)}</div>
+        ${buildFullPreviewTableHtml(columns, rows)}
+      `;
+    }
+
+    function closeFullPreview() {
+      if (!fullPreviewModal) return;
+
+      fullPreviewModal.classList.add('hidden');
+      fullPreviewModal.setAttribute('aria-hidden', 'true');
+
+      if (fullPreviewTableContainer) {
+        fullPreviewTableContainer.innerHTML = '';
+      }
+    }
+
     function bindTreeNodeEvents() {
       document.querySelectorAll('.tree-node').forEach((node) => {
+        node.setAttribute('tabindex', '0');
+        node.setAttribute('role', 'button');
+        node.setAttribute('title', 'Pasa el cursor para ver una vista previa. Haz click para ver la tabla completa.');
+
         node.addEventListener('mouseenter', () => {
           showTreePreview(node);
         });
 
         node.addEventListener('mouseleave', hideTreePreview);
+
+        node.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openFullPreview(node);
+        });
+
+        node.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openFullPreview(node);
+          }
+        });
       });
     }
 
@@ -510,7 +645,8 @@ const editor = CodeMirror.fromTextArea(document.getElementById('sql-editor'), {
           previewBody,
           previewTableContainer,
           emptyPreview,
-          `La tabla ${schemaName}.${tableName} no tiene registros.`
+          `La tabla ${schemaName}.${tableName} no tiene registros.`,
+          data.column_keys || {}
         );
 
         tableStatus.textContent = `Tabla activa: ${schemaName}.${tableName}. Filas mostradas: ${(data.rows || []).length}.`;
@@ -629,6 +765,24 @@ const editor = CodeMirror.fromTextArea(document.getElementById('sql-editor'), {
         renderTreeOutput();
       });
     }
+
+        if (closeFullPreviewBtn) {
+      closeFullPreviewBtn.addEventListener('click', closeFullPreview);
+    }
+
+    if (fullPreviewModal) {
+      fullPreviewModal.addEventListener('click', (event) => {
+        if (event.target === fullPreviewModal) {
+          closeFullPreview();
+        }
+      });
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeFullPreview();
+      }
+    });
 
     clearBtn.addEventListener('click', clearOutputs);
     function syncEditorTheme(isDark) {

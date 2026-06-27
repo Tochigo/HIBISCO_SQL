@@ -6,28 +6,21 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from editor.query_description import analizar_query
-from editor.relational_tree import relational_tree_to_text
-from editor.relational_preview import build_tree_preview_result
+from django.core.exceptions import ValidationError
 
-SYSTEM_SCHEMAS = {"information_schema", "pg_catalog", "public"}
-
+from .query_description import analizar_query
+from .relational_tree import relational_tree_to_text
+from .relational_preview import build_tree_preview_result
+from .sql_security import (
+    is_user_schema,
+    validate_safe_select_query,
+)
 
 def sql_editor(request):
     return render(request, "sql_editor.html")
 
-
-def _is_user_schema(schema_name: str) -> bool:
-    """Oculta schemas internos y schemas no usados para ejercicios."""
-    return (
-        bool(schema_name)
-        and schema_name not in SYSTEM_SCHEMAS
-        and not schema_name.startswith("pg_")
-    )
-
-
 def _table_exists(schema_name: str, table_name: str) -> bool:
-    if not _is_user_schema(schema_name) or not table_name:
+    if not is_user_schema(schema_name) or not table_name:
         return False
 
     with connection.cursor() as cursor:
@@ -43,6 +36,50 @@ def _table_exists(schema_name: str, table_name: str) -> bool:
             [schema_name, table_name],
         )
         return cursor.fetchone() is not None
+    
+def _get_table_key_metadata(schema_name: str, table_name: str) -> dict:
+    """
+    Devuelve metadatos de llaves por columna:
+    {
+      "id": {"primary": True, "foreign": False},
+      "curso_id": {"primary": False, "foreign": True}
+    }
+    """
+    column_keys = {}
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT
+                kcu.column_name,
+                tc.constraint_type
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage kcu
+              ON tc.constraint_name = kcu.constraint_name
+             AND tc.table_schema = kcu.table_schema
+             AND tc.table_name = kcu.table_name
+            WHERE tc.table_schema = %s
+              AND tc.table_name = %s
+              AND tc.constraint_type IN ('PRIMARY KEY', 'FOREIGN KEY')
+            ORDER BY kcu.ordinal_position;
+            """,
+            [schema_name, table_name],
+        )
+
+        for column_name, constraint_type in cursor.fetchall():
+            if column_name not in column_keys:
+                column_keys[column_name] = {
+                    "primary": False,
+                    "foreign": False,
+                }
+
+            if constraint_type == "PRIMARY KEY":
+                column_keys[column_name]["primary"] = True
+
+            if constraint_type == "FOREIGN KEY":
+                column_keys[column_name]["foreign"] = True
+
+    return column_keys
 
 
 @require_GET
@@ -51,11 +88,16 @@ def list_schemas(request):
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT schema_name
-                FROM information_schema.schemata
-                ORDER BY schema_name;
+                SELECT n.nspname
+                FROM pg_namespace n
+                WHERE n.nspname <> 'information_schema'
+                  AND n.nspname <> 'public'
+                  AND n.nspname NOT LIKE 'pg_%'
+                  AND has_schema_privilege(current_user, n.oid, 'USAGE')
+                ORDER BY n.nspname;
             """)
-            schemas = [row[0] for row in cursor.fetchall() if _is_user_schema(row[0])]
+
+            schemas = [row[0] for row in cursor.fetchall() if is_user_schema(row[0])]
 
         return JsonResponse({"ok": True, "schemas": schemas})
     except Exception as e:
@@ -67,7 +109,7 @@ def list_tables(request):
     """Devuelve las tablas base de un schema visible."""
     schema_name = request.GET.get("schema", "").strip()
 
-    if not _is_user_schema(schema_name):
+    if not is_user_schema(schema_name):
         return JsonResponse({
             "ok": False,
             "error": "Schema inválido o no permitido.",
@@ -113,10 +155,13 @@ def preview_table(request):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute("SET LOCAL TRANSACTION READ ONLY;")
-                cursor.execute(f"SELECT * FROM {quoted_schema}.{quoted_table} LIMIT 100;")
+                cursor.execute("SET LOCAL statement_timeout = '5s';")
+                cursor.execute(f"SET LOCAL search_path TO {quoted_schema};")
+                cursor.execute(f"SELECT * FROM {quoted_schema}.{quoted_table} LIMIT 1000;")
 
                 columns = [col[0] for col in cursor.description]
                 rows = cursor.fetchall()
+                key_metadata = _get_table_key_metadata(schema_name, table_name)
 
         return JsonResponse({
             "ok": True,
@@ -124,6 +169,7 @@ def preview_table(request):
             "table": table_name,
             "columns": columns,
             "rows": rows,
+            "column_keys": key_metadata,
         })
     except Exception as e:
         return JsonResponse({"ok": False, "error": str(e)})
@@ -143,30 +189,24 @@ def run_sql(request):
                 "error": "No se recibió ninguna consulta SQL.",
             })
 
-        if not _is_user_schema(schema_name):
+        if not is_user_schema(schema_name):
             return JsonResponse({
                 "ok": False,
                 "error": "Schema inválido o no permitido.",
             })
 
-        # Restricción básica de aplicación, sólo se permite lectura.
-        if not query.lower().startswith("select"):
+        try:
+            validate_safe_select_query(query, schema_name)
+        except ValidationError as e:
             return JsonResponse({
                 "ok": False,
-                "error": "Por seguridad, solo se permiten consultas SELECT.",
-            })
-
-        # Evita ejecutar varias sentencias en una sola llamada.
-        normalized_query = query.rstrip().rstrip(";").strip()
-        if ";" in normalized_query:
-            return JsonResponse({
-                "ok": False,
-                "error": "Por seguridad, solo se permite una consulta SELECT a la vez.",
+                "error": e.messages[0] if hasattr(e, "messages") else str(e),
             })
 
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute("SET LOCAL TRANSACTION READ ONLY;")
+                cursor.execute("SET LOCAL statement_timeout = '5s';")
 
                 quoted_schema = connection.ops.quote_name(schema_name)
                 cursor.execute(f"SET LOCAL search_path TO {quoted_schema};")

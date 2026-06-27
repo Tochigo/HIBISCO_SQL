@@ -45,3 +45,23 @@
 
 .answer-panel.is-visible { display: block; }
 .answer-panel .data-table-container { margin-top: 0.75rem; }
+
+@media (max-width: 700px) {
+  .operator-title {
+    font-size: clamp(1.45rem, 7vw, 2rem);
+  }
+
+  .operator-description,
+  .question {
+    font-size: 0.9rem;
+  }
+
+  .syntax-block {
+    font-size: 0.78rem;
+    padding: 0.8rem;
+  }
+
+  .table-label {
+    font-size: 0.86rem;
+  }
+}

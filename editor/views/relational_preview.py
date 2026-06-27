@@ -7,7 +7,8 @@ from sqlglot.errors import ParseError
 
 from django.db import connection, transaction
 
-from editor.relational_tree import build_relational_tree
+from .relational_tree import build_relational_tree
+from .sql_security import validate_user_schema
 
 
 PREVIEW_LIMIT = 5
@@ -17,22 +18,30 @@ def _clean_query(sql: str) -> str:
     return sql.strip().rstrip(';').strip()
 
 
-def _fetch_preview(sql: str, schema_name: str, limit: int = PREVIEW_LIMIT) -> dict:
+def _fetch_preview(sql: str, schema_name: str, limit: int | None = PREVIEW_LIMIT) -> dict:
     """
-    Ejecuta una consulta parcial en modo solo lectura y devuelve un máximo de filas.
-    La consulta parcial se envuelve como subconsulta para no depender de si ya trae LIMIT.
+    Ejecuta una consulta parcial en modo solo lectura.
+    Si limit es None, devuelve todas las filas del resultado del nodo.
     """
+    validate_user_schema(schema_name)
     cleaned_sql = _clean_query(sql)
     quoted_schema = connection.ops.quote_name(schema_name)
+
+    preview_sql = f"SELECT * FROM ({cleaned_sql}) AS hibisco_preview_node"
+    params = []
+
+    if limit is not None:
+        preview_sql += " LIMIT %s"
+        params.append(limit)
+
+    preview_sql += ";"
 
     with transaction.atomic():
         with connection.cursor() as cursor:
             cursor.execute("SET LOCAL TRANSACTION READ ONLY;")
+            cursor.execute("SET LOCAL statement_timeout = '5s';")
             cursor.execute(f"SET LOCAL search_path TO {quoted_schema};")
-            cursor.execute(
-                f"SELECT * FROM ({cleaned_sql}) AS hibisco_preview_node LIMIT %s;",
-                [limit],
-            )
+            cursor.execute(preview_sql, params)
 
             columns = [col[0] for col in cursor.description]
             rows = cursor.fetchall()
@@ -448,13 +457,20 @@ def build_tree_preview_result(query: str, schema_name: str, limit: int = PREVIEW
             "sql": spec.get("sql", ""),
             "columns": [],
             "rows": [],
+            "full_rows": [],
+            "full_row_count": 0,
             "error": None,
         }
 
         try:
-            fetched = _fetch_preview(spec["sql"], schema_name, limit=limit)
+            fetched = _fetch_preview(spec["sql"], schema_name, limit=None)
+
+            full_rows = fetched["rows"]
+
             preview_data["columns"] = fetched["columns"]
-            preview_data["rows"] = fetched["rows"]
+            preview_data["rows"] = full_rows[:limit]
+            preview_data["full_rows"] = full_rows
+            preview_data["full_row_count"] = len(full_rows)
         except Exception as e:
             preview_data["error"] = str(e)
 

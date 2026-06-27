@@ -13,13 +13,13 @@
 
 {% block content %}
 <section class="segment">
-        <h2 class="segment-title">Tablas disponibles</h2>
+        <h2 class="segment-title">Esquemas disponibles</h2>
 
         <div class="tabs" id="schemaTabs"></div>
 
         <div class="table-toolbar">
           <span id="tableStatus">Cargando esquemas...</span>
-          <span>Vista limitada a 100 filas.</span>
+          <span>Vista limitada a 1000 filas.</span>
         </div>
 
         <div class="schema-table-layout">
@@ -44,15 +44,14 @@
 
       <section class="segment">
         <h2 class="segment-title">Compilador SQL</h2>
-        <p class="segment-subtitle">Escribe acá tu consulta.</p>
+        <p class="segment-subtitle">Escribe acá tu consulta. Asegúrate de haber seleccionado el esquema correspondiente.</p>
 
         <div class="compiler-grid">
           <div>
             <div class="editor-shell">
               <textarea id="sql-editor">SELECT *
 FROM estudiantes
-LIMIT 10;
-              </textarea>
+LIMIT 10;</textarea>
             </div>
             <div id="statusMessage" class="status-message hidden"></div>
           </div>
@@ -80,10 +79,31 @@ LIMIT 10;
             <span class="tree-format-toggle-slider" aria-hidden="true"></span>
             <span class="tree-format-toggle-option" id="treeLabelModeText">Palabras</span>
           </label>
+          <p class="segment-subtitle">Pasa el cursor sobre un operador para ver la vista previa de la tabla en ese paso y clickea para ver la tabla completa.</p>
+
         </div>
 
         <div id="treeOutput" class="text-output tree-output">El árbol relacional aparecerá aquí después de ejecutar una consulta.</div>
         <div id="treePreviewTooltip" class="tree-preview-tooltip"></div>
+
+        <div id="fullPreviewModal" class="full-preview-modal hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="fullPreviewTitle">
+          <div class="full-preview-dialog">
+            <div class="full-preview-header">
+              <div>
+                <h3 id="fullPreviewTitle" class="full-preview-title">Tabla completa del operador</h3>
+                <p class="full-preview-subtitle">Tabla completa para este paso de la consulta.</p>
+              </div>
+
+              <button id="closeFullPreviewBtn" class="full-preview-close" type="button" aria-label="Cerrar tabla completa">
+                ×
+              </button>
+            </div>
+
+            <div id="fullPreviewSql" class="full-preview-sql hidden"></div>
+            <div id="fullPreviewEmpty" class="full-preview-empty hidden"></div>
+            <div id="fullPreviewTableContainer" class="full-preview-table-container"></div>
+          </div>
+        </div>
       </section>
 
       <section class="segment">

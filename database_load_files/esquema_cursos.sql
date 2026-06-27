@@ -18,36 +18,37 @@ CREATE TABLE IF NOT EXISTS "cursos" (
 	PRIMARY KEY ("codigo")
 );
 
--- Volcando estructura para tabla public.cursos_docentes
-CREATE TABLE IF NOT EXISTS "cursos_docentes" (
+-- Volcando estructura para tabla public.cursos_profesores
+CREATE TABLE IF NOT EXISTS "cursos_profesores" (
 	"id" SERIAL NOT NULL,
 	"codigo_curso" VARCHAR(20) NOT NULL,
-	"id_docente" INTEGER NOT NULL,
+	"id_profesor" INTEGER NOT NULL,
 	PRIMARY KEY ("id"),
-	UNIQUE ("codigo_curso", "id_docente")
+	UNIQUE ("codigo_curso", "id_profesor")
 );
 
--- Volcando estructura para tabla public.docentes
-CREATE TABLE IF NOT EXISTS "docentes" (
-	"id_docente" SERIAL NOT NULL,
+-- Volcando estructura para tabla public.profesores
+CREATE TABLE IF NOT EXISTS "profesores" (
+	"id_profesor" SERIAL NOT NULL,
 	"nombre" VARCHAR(80) NOT NULL,
 	"apellido" VARCHAR(80) NOT NULL,
 	"edad" INTEGER NOT NULL,
 	"rut" VARCHAR(20) NOT NULL,
 	"departamento" VARCHAR(120) NOT NULL,
-	PRIMARY KEY ("id_docente"),
+	PRIMARY KEY ("id_profesor"),
 	UNIQUE ("rut"),
-	CONSTRAINT "docentes_edad_check" CHECK ((edad >= 25))
+	CONSTRAINT "profesores_edad_check" CHECK ((edad >= 25))
 );
 
 -- Volcando estructura para tabla public.estudiantes
 CREATE TABLE IF NOT EXISTS "estudiantes" (
-	nombre VARCHAR(50) NULL DEFAULT NULL,
-	apellido VARCHAR(50) NULL DEFAULT NULL,
-	edad INTEGER NULL DEFAULT NULL,
-	genero VARCHAR(50) NULL DEFAULT NULL,
-	rut VARCHAR(50) NULL DEFAULT NULL,
-	especialidad VARCHAR(50) NULL DEFAULT NULL
+	"nombre" VARCHAR(50) NULL DEFAULT NULL,
+	"apellido" VARCHAR(50) NULL DEFAULT NULL,
+	"edad" INTEGER NULL DEFAULT NULL,
+	"genero" VARCHAR(50) NULL DEFAULT NULL,
+	"rut" VARCHAR(20) NOT NULL,
+	"departamento" VARCHAR(50) NULL DEFAULT NULL,
+	PRIMARY KEY ("rut")
 );
 
 -- Volcando estructura para tabla public.inscripciones
@@ -58,7 +59,6 @@ CREATE TABLE IF NOT EXISTS "inscripciones" (
 	"nota_final" NUMERIC(2,1) NULL DEFAULT NULL,
 	PRIMARY KEY ("id")
 );
-
 
 -- Volcando datos para la tabla public.cursos: 43 rows
 INSERT INTO "cursos" ("codigo", "nombre") VALUES
@@ -104,11 +104,14 @@ INSERT INTO "cursos" ("codigo", "nombre") VALUES
 	('MA2001', 'Cálculo en Varias Variables'),
 	('MA2002', 'Cálculo Avanzado y Aplicaciones'),
 	('MA2601', 'Ecuaciones Diferenciales Ordinarias'),
-	('MA3403', 'Probabilidades y Estadística');
+	('MA3403', 'Probabilidades y Estadística'),
+	('CC5602', 'Curso CC5602'),
+	('EI1090', 'Curso EI1090'),
+	('EI2090', 'Curso EI2090');
 
 
--- Volcando datos para la tabla public.cursos_docentes: 74 rows
-INSERT INTO "cursos_docentes" ("id", "codigo_curso", "id_docente") VALUES
+-- Volcando datos para la tabla public.cursos_profesores: 74 rows
+INSERT INTO "cursos_profesores" ("id", "codigo_curso", "id_profesor") VALUES
 	(1, 'BT1211', 12),
 	(2, 'BT1211', 17),
 	(3, 'CC1000', 10),
@@ -185,32 +188,32 @@ INSERT INTO "cursos_docentes" ("id", "codigo_curso", "id_docente") VALUES
 	(74, 'MA3403', 16);
 
 
--- Volcando datos para la tabla public.docentes: 20 rows
-INSERT INTO "docentes" ("id_docente", "nombre", "apellido", "edad", "rut", "departamento") VALUES
-	(1, 'Patricio', 'González', 45, '12.345.678-5', 'Departamento de Ciencias de la Computación'),
-	(2, 'María', 'Fernández', 39, '13.456.789-1', 'Departamento de Ciencias de la Computación'),
-	(3, 'Camila', 'Rojas', 34, '15.234.567-8', 'Departamento de Ciencias de la Computación'),
-	(4, 'Rodrigo', 'Muñoz', 50, '10.987.654-6', 'Departamento de Ciencias de la Computación'),
-	(5, 'Valentina', 'Castro', 41, '14.876.543-2', 'Departamento de Ciencias de la Computación'),
-	(6, 'Sebastián', 'Herrera', 37, '16.345.219-0', 'Departamento de Ciencias de la Computación'),
-	(7, 'Daniela', 'Vargas', 44, '11.222.333-4', 'Departamento de Ciencias de la Computación'),
-	(8, 'Felipe', 'Morales', 36, '17.654.321-K', 'Departamento de Ciencias de la Computación'),
-	(9, 'Andrés', 'Silva', 48, '9.876.543-3', 'Departamento de Ingeniería Matemática'),
-	(10, 'Francisca', 'López', 42, '12.876.234-7', 'Departamento de Ingeniería Matemática'),
-	(11, 'Javiera', 'Contreras', 35, '18.234.765-5', 'Departamento de Ingeniería Matemática'),
-	(12, 'Ignacio', 'Torres', 46, '8.765.432-1', 'Departamento de Física'),
-	(13, 'Paula', 'Navarro', 38, '16.789.234-9', 'Departamento de Física'),
-	(14, 'Cristóbal', 'Reyes', 52, '7.654.321-8', 'Departamento de Física'),
-	(15, 'Carolina', 'Paredes', 40, '13.987.456-2', 'Departamento de Ingeniería Industrial'),
-	(16, 'Nicolás', 'Araya', 43, '15.678.912-3', 'Departamento de Ingeniería Industrial'),
-	(17, 'Macarena', 'Fuentes', 37, '17.890.123-6', 'Departamento de Ingeniería Química'),
-	(18, 'Tomás', 'Espinoza', 49, '11.543.876-9', 'Departamento de Ingeniería Civil'),
-	(19, 'Claudia', 'Sepúlveda', 45, '14.321.987-0', 'Departamento de Geología'),
-	(20, 'Matías', 'Cortés', 33, '19.345.678-4', 'Departamento de Ingeniería Eléctrica');
+-- Volcando datos para la tabla public.profesores: 20 rows
+INSERT INTO "profesores" ("id_profesor", "nombre", "apellido", "edad", "rut", "departamento") VALUES
+	(1, 'Patricio', 'González', 45, '12345678-5', 'Departamento de Ciencias de la Computación'),
+	(2, 'María', 'Fernández', 39, '13456789-1', 'Departamento de Ciencias de la Computación'),
+	(3, 'Camila', 'Rojas', 34, '15234567-8', 'Departamento de Ciencias de la Computación'),
+	(4, 'Rodrigo', 'Muñoz', 50, '10987654-6', 'Departamento de Ciencias de la Computación'),
+	(5, 'Valentina', 'Castro', 41, '14876543-2', 'Departamento de Ciencias de la Computación'),
+	(6, 'Sebastián', 'Herrera', 37, '16345219-0', 'Departamento de Ciencias de la Computación'),
+	(7, 'Daniela', 'Vargas', 44, '11222333-4', 'Departamento de Ciencias de la Computación'),
+	(8, 'Felipe', 'Morales', 36, '17654321-K', 'Departamento de Ciencias de la Computación'),
+	(9, 'Andrés', 'Silva', 48, '9876543-3', 'Departamento de Ingeniería Matemática'),
+	(10, 'Francisca', 'López', 42, '12876234-7', 'Departamento de Ingeniería Matemática'),
+	(11, 'Javiera', 'Contreras', 35, '18234765-5', 'Departamento de Ingeniería Matemática'),
+	(12, 'Ignacio', 'Torres', 46, '8765432-1', 'Departamento de Física'),
+	(13, 'Paula', 'Navarro', 38, '16789234-9', 'Departamento de Física'),
+	(14, 'Cristóbal', 'Reyes', 52, '7654321-8', 'Departamento de Física'),
+	(15, 'Carolina', 'Paredes', 40, '13987456-2', 'Departamento de Ingeniería Industrial'),
+	(16, 'Nicolás', 'Araya', 43, '15678912-3', 'Departamento de Ingeniería Industrial'),
+	(17, 'Macarena', 'Fuentes', 37, '17890123-6', 'Departamento de Ingeniería Química'),
+	(18, 'Tomás', 'Espinoza', 49, '11543876-9', 'Departamento de Ingeniería Civil'),
+	(19, 'Claudia', 'Sepúlveda', 45, '14321987-0', 'Departamento de Geología'),
+	(20, 'Matías', 'Cortés', 33, '19345678-4', 'Departamento de Ingeniería Eléctrica');
 
 
 -- Volcando datos para la tabla public.estudiantes: 153 rows
-INSERT INTO "estudiantes" (nombre, apellido, edad, genero, rut, especialidad) VALUES
+INSERT INTO "estudiantes" (nombre, apellido, edad, genero, rut, departamento) VALUES
 	('Enrique', 'Garza', 22, 'Masculino', '21413288-9', 'Computación'),
 	('Francisca', 'Castillo', 21, 'Femenino', '22209551-7', 'Computación'),
 	('Catalina', 'Cepeda', 22, 'Femenino', '21080456-5', 'Industrial'),
@@ -2216,4 +2219,40 @@ INSERT INTO "inscripciones" ("id", "rut_estudiante", "codigo_curso", "nota_final
 	(1846, '20117605-0', 'MA3403', 5.4),
 	(1847, '21005261-5', 'MA3403', 1.5);
 
+-- Ajuste de secuencias después de insertar IDs explícitos.
+SELECT setval('cursos.cursos_profesores_id_seq', COALESCE((SELECT MAX("id") FROM cursos.cursos_profesores), 1), true);
+SELECT setval('cursos.profesores_id_profesor_seq', COALESCE((SELECT MAX("id_profesor") FROM cursos.profesores), 1), true);
+SELECT setval('cursos.inscripciones_id_seq', COALESCE((SELECT MAX("id") FROM cursos.inscripciones), 1), true);
 
+-- Restricciones relacionales.
+ALTER TABLE "cursos_profesores"
+ADD CONSTRAINT "cursos_profesores_codigo_curso_fkey"
+FOREIGN KEY ("codigo_curso")
+REFERENCES "cursos" ("codigo")
+ON UPDATE CASCADE
+ON DELETE CASCADE;
+
+ALTER TABLE "cursos_profesores"
+ADD CONSTRAINT "cursos_profesores_id_profesor_fkey"
+FOREIGN KEY ("id_profesor")
+REFERENCES "profesores" ("id_profesor")
+ON UPDATE CASCADE
+ON DELETE CASCADE;
+
+ALTER TABLE "inscripciones"
+ADD CONSTRAINT "inscripciones_rut_estudiante_fkey"
+FOREIGN KEY ("rut_estudiante")
+REFERENCES "estudiantes" ("rut")
+ON UPDATE CASCADE
+ON DELETE CASCADE;
+
+ALTER TABLE "inscripciones"
+ADD CONSTRAINT "inscripciones_codigo_curso_fkey"
+FOREIGN KEY ("codigo_curso")
+REFERENCES "cursos" ("codigo")
+ON UPDATE CASCADE
+ON DELETE CASCADE;
+
+ALTER TABLE "inscripciones"
+ADD CONSTRAINT "inscripciones_rut_codigo_unique"
+UNIQUE ("rut_estudiante", "codigo_curso");
