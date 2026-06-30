@@ -44,6 +44,10 @@ def _get_table_key_metadata(schema_name: str, table_name: str) -> dict:
       "id": {"primary": True, "foreign": False},
       "curso_id": {"primary": False, "foreign": True}
     }
+
+    Se usa pg_catalog en vez de information_schema porque un usuario
+    de solo lectura puede no ver correctamente las restricciones desde
+    information_schema.
     """
     column_keys = {}
 
@@ -51,33 +55,35 @@ def _get_table_key_metadata(schema_name: str, table_name: str) -> dict:
         cursor.execute(
             """
             SELECT
-                kcu.column_name,
-                tc.constraint_type
-            FROM information_schema.table_constraints tc
-            JOIN information_schema.key_column_usage kcu
-              ON tc.constraint_name = kcu.constraint_name
-             AND tc.table_schema = kcu.table_schema
-             AND tc.table_name = kcu.table_name
-            WHERE tc.table_schema = %s
-              AND tc.table_name = %s
-              AND tc.constraint_type IN ('PRIMARY KEY', 'FOREIGN KEY')
-            ORDER BY kcu.ordinal_position;
+                a.attname AS column_name,
+                COALESCE(bool_or(c.contype = 'p'), false) AS is_primary_key,
+                COALESCE(bool_or(c.contype = 'f'), false) AS is_foreign_key
+            FROM pg_class t
+            JOIN pg_namespace n
+                ON n.oid = t.relnamespace
+            JOIN pg_attribute a
+                ON a.attrelid = t.oid
+            LEFT JOIN pg_constraint c
+                ON c.conrelid = t.oid
+               AND c.contype IN ('p', 'f')
+               AND a.attnum = ANY(c.conkey)
+            WHERE n.nspname = %s
+              AND t.relname = %s
+              AND t.relkind = 'r'
+              AND a.attnum > 0
+              AND NOT a.attisdropped
+            GROUP BY a.attnum, a.attname
+            ORDER BY a.attnum;
             """,
             [schema_name, table_name],
         )
 
-        for column_name, constraint_type in cursor.fetchall():
-            if column_name not in column_keys:
+        for column_name, is_primary_key, is_foreign_key in cursor.fetchall():
+            if is_primary_key or is_foreign_key:
                 column_keys[column_name] = {
-                    "primary": False,
-                    "foreign": False,
+                    "primary": bool(is_primary_key),
+                    "foreign": bool(is_foreign_key),
                 }
-
-            if constraint_type == "PRIMARY KEY":
-                column_keys[column_name]["primary"] = True
-
-            if constraint_type == "FOREIGN KEY":
-                column_keys[column_name]["foreign"] = True
 
     return column_keys
 
