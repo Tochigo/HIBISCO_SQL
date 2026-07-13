@@ -79,16 +79,16 @@ OPERATORS = {
             "Se usa con la palabra clave AS."
         ),
         "syntax": "SELECT columna AS alias_columna\nFROM nombre_tabla;",
-        "question": "Obtenga el nombre de los planetas bajo el alias splaneta desde la tabla satélite, tal que dichos planetas aparezcan también en la tabla aterrizaje.",
+        "question": "Obtenga el nombre de los planetas bajo el alias splaneta desde la tabla satelite, tal que dichos planetas aparezcan también en la tabla aterrizaje.",
         "columns": ["tabla", "nombre", "planeta", "descubridor", "año", "nave", "país"],
         "rows": [
-            ["satélite", "Calisto", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
-            ["satélite", "Europa", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
-            ["satélite", "Ganímedes", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
-            ["satélite", "Ío", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
-            ["satélite", "Luna", "Tierra", "-", "-", "-", "-"],
-            ["satélite", "Titán", "Saturno", "Christiaan Huygens", 1655, "-", "-"],
-            ["satélite", "Tritón", "Neptuno", "William Lassell", 1846, "-", "-"],
+            ["satelite", "Calisto", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
+            ["satelite", "Europa", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
+            ["satelite", "Ganímedes", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
+            ["satelite", "Ío", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
+            ["satelite", "Luna", "Tierra", "-", "-", "-", "-"],
+            ["satelite", "Titán", "Saturno", "Christiaan Huygens", 1655, "-", "-"],
+            ["satelite", "Tritón", "Neptuno", "William Lassell", 1846, "-", "-"],
             ["aterrizaje", "-", "Marte", "-", 1976, "Viking 1", "EEUU"],
             ["aterrizaje", "-", "Marte", "-", 2003, "Beagle 2", "ESA"],
             ["aterrizaje", "-", "Júpiter", "-", 2003, "Galileo", "EEUU"],
@@ -97,7 +97,7 @@ OPERATORS = {
             ["aterrizaje", "-", "Venus", "-", 1978, "Pioneer", "EEUU"],
             ["aterrizaje", "-", "Venus", "-", 1966, "Venera 3", "URRS"],
         ],
-        "answer_sql": "SELECT S.planeta AS splaneta\nFROM satélite S, aterrizaje A\nWHERE S.planeta = A.planeta;",
+        "answer_sql": "SELECT S.planeta AS splaneta\nFROM satelite S, aterrizaje A\nWHERE S.planeta = A.planeta;",
         "answer_columns": ["splaneta"],
         "answer_rows": [
             ["Júpiter"],
@@ -116,7 +116,7 @@ OPERATORS = {
             "Por defecto, UNION elimina filas duplicadas."
         ),
         "syntax": "SELECT columna1, columna2\nFROM tabla1\nUNION\nSELECT columna1, columna2\nFROM tabla2;",
-        "question": "Obtenga la unión de los nombres desdes las tablas planeta y satélite.",
+        "question": "Obtenga la unión de los nombres desdes las tablas planeta y satelite.",
         "columns": ["tabla", "nombre", "dist", "radio", "grav", "días", "años", "temp", "anillo", "planeta", "descubridor", "año"],
         "rows": [
             ["planeta", "Mercurio", 0.39, 0.38, 2.8, 58.646, 0.241, 440, "false", "-", "-", "-"],
@@ -127,13 +127,13 @@ OPERATORS = {
             ["planeta", "Saturno", 9.54, 9.14, 9.1, 0.444, 29.447, 134, "true", "-", "-", "-"],
             ["planeta", "Urano", 19.19, 3.98, 7.8, -0.719, 84.017, 76, "true", "-", "-", "-"],
             ["planeta", "Neptuno", 30.07, 3.86, 11.0, 0.671, 164.791, 53, "true", "-", "-", "-"],
-            ["satélite", "Calisto", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
-            ["satélite", "Europa", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
-            ["satélite", "Ganímedes", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
-            ["satélite", "Ío", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
-            ["satélite", "Luna", "-", "-", "-", "-", "-", "-", "-", "Tierra", "-", "-"],
-            ["satélite", "Titán", "-", "-", "-", "-", "-", "-", "-", "Saturno", "Christiaan Huygens", 1655],
-            ["satélite", "Tritón", "-", "-", "-", "-", "-", "-", "-", "Neptuno", "William Lassell", 1846],
+            ["satelite", "Calisto", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
+            ["satelite", "Europa", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
+            ["satelite", "Ganímedes", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
+            ["satelite", "Ío", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
+            ["satelite", "Luna", "-", "-", "-", "-", "-", "-", "-", "Tierra", "-", "-"],
+            ["satelite", "Titán", "-", "-", "-", "-", "-", "-", "-", "Saturno", "Christiaan Huygens", 1655],
+            ["satelite", "Tritón", "-", "-", "-", "-", "-", "-", "-", "Neptuno", "William Lassell", 1846],
         ],
         "answer_sql": (
             "SELECT nombre\n"
@@ -170,7 +170,7 @@ OPERATORS = {
             "pero no aparecen en la segunda. Se puede entender como una resta entre conjuntos."
         ),
         "syntax": "SELECT columna1, columna2\nFROM tabla1\nEXCEPT\nSELECT columna1, columna2\nFROM tabla2;",
-        "question": "Obtenga los nombres de los planetas con distancia mayor a 1.00, y que no estén en la tabla de satélites.",
+        "question": "Obtenga los nombres de los planetas con distancia mayor a 1.00, y que no estén en la tabla de satelites.",
         "columns": ["tabla", "nombre", "dist", "radio", "grav", "días", "años", "temp", "anillo", "planeta", "descubridor", "año"],
         "rows": [
             ["planeta", "Mercurio", 0.39, 0.38, 2.8, 58.646, 0.241, 440, "false", "-", "-", "-"],
@@ -181,13 +181,13 @@ OPERATORS = {
             ["planeta", "Saturno", 9.54, 9.14, 9.1, 0.444, 29.447, 134, "true", "-", "-", "-"],
             ["planeta", "Urano", 19.19, 3.98, 7.8, -0.719, 84.017, 76, "true", "-", "-", "-"],
             ["planeta", "Neptuno", 30.07, 3.86, 11.0, 0.671, 164.791, 53, "true", "-", "-", "-"],
-            ["satélite", "Calisto", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
-            ["satélite", "Europa", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
-            ["satélite", "Ganímedes", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
-            ["satélite", "Ío", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
-            ["satélite", "Luna", "-", "-", "-", "-", "-", "-", "-", "Tierra", "-", "-"],
-            ["satélite", "Titán", "-", "-", "-", "-", "-", "-", "-", "Saturno", "Christiaan Huygens", 1655],
-            ["satélite", "Tritón", "-", "-", "-", "-", "-", "-", "-", "Neptuno", "William Lassell", 1846],
+            ["satelite", "Calisto", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
+            ["satelite", "Europa", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
+            ["satelite", "Ganímedes", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
+            ["satelite", "Ío", "-", "-", "-", "-", "-", "-", "-", "Júpiter", "Galileo Galilei", 1610],
+            ["satelite", "Luna", "-", "-", "-", "-", "-", "-", "-", "Tierra", "-", "-"],
+            ["satelite", "Titán", "-", "-", "-", "-", "-", "-", "-", "Saturno", "Christiaan Huygens", 1655],
+            ["satelite", "Tritón", "-", "-", "-", "-", "-", "-", "-", "Neptuno", "William Lassell", 1846],
         ],
         "answer_sql": (
             "SELECT nombre as planeta\n"
@@ -195,7 +195,7 @@ OPERATORS = {
             "WHERE dist > 1.00\n"
             "EXCEPT\n"
             "SELECT planeta\n"
-            "FROM satélite;"
+            "FROM satelite;"
         ),
         "answer_columns": ["planeta"],
         "answer_rows": [
@@ -344,16 +344,16 @@ OPERATORS = {
             "FROM tabla1\n"
             "FULL OUTER JOIN tabla2 ON tabla1.columna_comun = tabla2.columna_comun;"
         ),
-        "question": "Muestre todos los satélites y todos los aterrizajes, existan o no coincidencias entre sus planetas.",
+        "question": "Muestre todos los satelites y todos los aterrizajes, existan o no coincidencias entre sus planetas.",
         "columns": ["tabla", "nombre", "planeta", "descubridor", "año", "nave", "país"],
         "rows": [
-            ["satélite", "Calisto", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
-            ["satélite", "Europa", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
-            ["satélite", "Ganímedes", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
-            ["satélite", "Ío", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
-            ["satélite", "Luna", "Tierra", "-", "-", "-", "-"],
-            ["satélite", "Titán", "Saturno", "Christiaan Huygens", 1655, "-", "-"],
-            ["satélite", "Tritón", "Neptuno", "William Lassell", 1846, "-", "-"],
+            ["satelite", "Calisto", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
+            ["satelite", "Europa", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
+            ["satelite", "Ganímedes", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
+            ["satelite", "Ío", "Júpiter", "Galileo Galilei", 1610, "-", "-"],
+            ["satelite", "Luna", "Tierra", "-", "-", "-", "-"],
+            ["satelite", "Titán", "Saturno", "Christiaan Huygens", 1655, "-", "-"],
+            ["satelite", "Tritón", "Neptuno", "William Lassell", 1846, "-", "-"],
             ["aterrizaje", "-", "Marte", "-", 1976, "Viking 1", "EEUU"],
             ["aterrizaje", "-", "Marte", "-", 2003, "Beagle 2", "ESA"],
             ["aterrizaje", "-", "Júpiter", "-", 2003, "Galileo", "EEUU"],
@@ -364,12 +364,12 @@ OPERATORS = {
         ],
         "answer_sql": (
             "SELECT planeta, nave, nombre AS\n"
-            "satélite\n"
-            "FROM Satélite S FULL OUTER JOIN\n"
+            "satelite\n"
+            "FROM satelite S FULL OUTER JOIN\n"
             "Aterrizaje A\n"
             "ON S.planeta = A.planeta"
         ),
-        "answer_columns": ["planeta", "nave", "satélite"],
+        "answer_columns": ["planeta", "nave", "satelite"],
         "answer_rows": [
             ["Tierra", "-", "Luna"],
             ["Júpiter", "Galileo", "Ganímedes"],
