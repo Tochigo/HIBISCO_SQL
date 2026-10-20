@@ -1,6 +1,7 @@
 # HIBISCO SQL
 
 HIBISCO SQL es una aplicación web desarrollada con Django y PostgreSQL para practicar consultas SQL. La plataforma permite visualizar tablas disponibles, ejecutar consultas, revisar resultados y observar una descripción de los pasos de ejecución junto con un árbol relacional.
+La aplicación se encuentra disponible en [hibisco.dcc.uchile.cl](hibisco.dcc.uchile.cl).
 
 ---
 
